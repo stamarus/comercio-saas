@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Criar Minha Loja - Cardápio Digital & Automação de Pedidos</title>
+  <meta name="theme-color" content="#C0392B">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Supabase JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fdf3f2',
+              100: '#fce4e2',
+              500: '#e64a19',
+              600: '#d84315',
+              700: '#c0392b',
+              800: '#a93226',
+              900: '#641e16',
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen py-8 px-4 flex flex-col justify-center items-center">
+
+  <div class="w-full max-w-xl">
+
+    <!-- HEADER LOGO -->
+    <div class="text-center mb-6">
+      <div class="w-16 h-16 bg-brand-700 text-white rounded-3xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-brand-700/20 text-2xl font-black">
+        ⚡
+      </div>
+      <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Criar Meu Negócio Online</h1>
+      <p class="text-xs text-gray-500 mt-1 max-w-sm mx-auto">Ative seu catálogo digital e sistema de pedidos com WhatsApp em menos de 2 minutos!</p>
+    </div>
+
+    <!-- FORM CARD -->
+    <div id="formCard" class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-gray-100 animate-slide-up">
+      <form onsubmit="handleCreateStore(event)" class="space-y-4 text-xs">
+        
+        <!-- Store Name -->
+        <div>
+          <label class="block font-bold text-gray-700 mb-1">Nome do seu Estabelecimento / Loja *</label>
+          <input type="text" id="storeName" required placeholder="Ex: Pizzaria Bella Italia, Burger House..." class="w-full p-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-brand-500 font-bold text-sm bg-gray-50/50" oninput="autoGenerateSlug(this.value)">
+        </div>
+
+        <!-- Custom Slug / URL -->
+        <div>
+          <label class="block font-bold text-gray-700 mb-1">Identificador do seu Link (URL)</label>
+          <div class="flex items-center rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2 text-xs">
+            <span class="text-gray-400 select-none font-mono text-[11px]">.../?loja=</span>
+            <input type="text" id="storeSlug" required placeholder="meu-negocio" class="flex-1 bg-transparent font-mono font-bold text-brand-700 focus:outline-none text-xs">
+          </div>
+          <p class="text-[10px] text-gray-400 mt-1">Este será o endereço exclusivo da sua loja.</p>
+        </div>
+
+        <!-- Niche / Segment -->
+        <div>
+          <label class="block font-bold text-gray-700 mb-1">Segmento / Nicho Principal *</label>
+          <select id="storeNiche" class="w-full p-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-brand-500 font-bold bg-white text-xs">
+            <option value="marmitaria">🍛 Marmitaria & Comida Caseira (P, M e G)</option>
+            <option value="pizzaria">🍕 Pizzaria & Calzones</option>
+            <option value="hamburgueria">🍔 Hamburgueria & Lanches</option>
+            <option value="acai">🍧 Açaí & Sobremesas</option>
+            <option value="bebidas">🥤 Distribuidora de Bebidas</option>
+            <option value="geral">🛒 Geral / Produtos Diversos</option>
+          </select>
+          <p class="text-[10px] text-gray-400 mt-1">Já pré-carregamos itens e fotos iniciais prontos para o seu nicho!</p>
+        </div>
+
+        <!-- WhatsApp & Pix -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+          <div>
+            <label class="block font-bold text-gray-700 mb-1">WhatsApp para Receber Pedidos *</label>
+            <input type="tel" id="storeWhatsapp" required placeholder="DDD + Número (ex: 41999999999)" class="w-full p-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-brand-500 font-medium bg-gray-50/50">
+          </div>
+          <div>
+            <label class="block font-bold text-gray-700 mb-1">Chave Pix para Pagamento *</label>
+            <input type="text" id="storePix" required placeholder="CPF, Celular ou CNPJ" class="w-full p-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-brand-500 font-medium bg-gray-50/50">
+          </div>
+        </div>
+
+        <!-- Delivery Fee & Password -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-gray-700 mb-1">Taxa de Entrega Padrão (R$)</label>
+            <input type="number" step="0.50" id="storeFee" value="5.00" class="w-full p-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-brand-500 font-bold bg-gray-50/50">
+          </div>
+          <div>
+            <label class="block font-bold text-gray-700 mb-1">Senha de Acesso ao Painel *</label>
+            <input type="password" id="storePassword" required placeholder="Crie sua senha de administrador" class="w-full p-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-brand-500 font-bold bg-gray-50/50">
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="pt-4">
+          <button type="submit" id="btnSubmitStore" class="w-full bg-brand-700 hover:bg-brand-800 text-white font-bold py-3.5 rounded-2xl text-sm transition shadow-lg shadow-brand-700/20 active:scale-95 flex items-center justify-center space-x-2">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            <span>Criar Minha Loja Agora</span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- SUCCESS CARD -->
+    <div id="successCard" class="bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-emerald-100 hidden animate-slide-up text-center space-y-5">
+      <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto border border-emerald-100 shadow-inner text-2xl">
+        🎉
+      </div>
+      <div>
+        <h2 class="text-xl font-black text-gray-900" id="successStoreTitle">Sua loja está pronta!</h2>
+        <p class="text-xs text-gray-500 mt-1">Seus links exclusivos já estão no ar e prontos para vender.</p>
+      </div>
+
+      <!-- Links Box -->
+      <div class="space-y-3 text-left">
+        <!-- Client Menu Link -->
+        <div class="p-3.5 bg-brand-50/60 rounded-2xl border border-brand-200 space-y-1">
+          <span class="text-[10px] font-black text-brand-900 uppercase tracking-wider block">📱 Link do Cardápio / Catálogo (Para os Clientes)</span>
+          <div class="flex items-center justify-between gap-2">
+            <input type="text" id="menuLinkInput" readonly class="w-full bg-white font-mono text-xs font-bold text-gray-800 p-2 rounded-xl border border-brand-200 select-all">
+            <button onclick="copyToClipboard('menuLinkInput', 'btnCopyMenu')" id="btnCopyMenu" class="bg-brand-700 hover:bg-brand-800 text-white font-bold px-3 py-2 rounded-xl text-xs flex items-center gap-1 shadow-sm whitespace-nowrap">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              <span>Copiar</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Dashboard Link -->
+        <div class="p-3.5 bg-gray-50 rounded-2xl border border-gray-200 space-y-1">
+          <span class="text-[10px] font-black text-gray-700 uppercase tracking-wider block">💻 Link do Painel de Gestão (Para você gerenciar)</span>
+          <div class="flex items-center justify-between gap-2">
+            <input type="text" id="dashboardLinkInput" readonly class="w-full bg-white font-mono text-xs font-bold text-gray-800 p-2 rounded-xl border border-gray-200 select-all">
+            <button onclick="copyToClipboard('dashboardLinkInput', 'btnCopyDash')" id="btnCopyDash" class="bg-gray-800 hover:bg-gray-900 text-white font-bold px-3 py-2 rounded-xl text-xs flex items-center gap-1 shadow-sm whitespace-nowrap">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              <span>Copiar</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="pt-2 flex flex-col sm:flex-row gap-2">
+        <a id="btnOpenMenu" href="#" target="_blank" class="flex-1 bg-brand-700 hover:bg-brand-800 text-white font-bold py-3 rounded-xl text-xs text-center transition shadow-md flex items-center justify-center gap-1.5">
+          <i data-lucide="external-link" class="w-4 h-4"></i>
+          <span>Abrir Cardápio</span>
+        </a>
+        <a id="btnOpenDashboard" href="#" target="_blank" class="flex-1 bg-gray-900 hover:bg-black text-white font-bold py-3 rounded-xl text-xs text-center transition shadow-md flex items-center justify-center gap-1.5">
+          <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+          <span>Abrir Painel de Gestão</span>
+        </a>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://pwrtnhgsgvcqoyttkmmq.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3cnRuaGdzZ3ZjcW95dHRrbW1xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2MjQ3MDksImV4cCI6MjEwMzIwMDcwOX0.FaCRpqL2AEJIi5S4g3sswPFBASAkjrKKCWYwCyBZwJ0';
+    let supabaseClient = null;
+
+    try {
+      if (window.supabase) {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      }
+    } catch(e) {
+      console.warn('Supabase not ready:', e);
+    }
+
+    function autoGenerateSlug(name) {
+      const slug = name
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      document.getElementById('storeSlug').value = slug;
+    }
+
+    // TEMPLATES POR NICHO
+    const NICHE_TEMPLATES = {
+      marmitaria: [
+        { id: 'prato_executivo', categoria: 'marmitas', nome: 'Marmita Tradicional do Dia', descricao: 'Acompanha arroz, feijão caseiro, purê de batata, farofa especial, macarrão e salada.', tipo: 'marmita_sizes', preco: 15.00, sizes: [{ id: 'P', name: 'Marmita P', desc: 'Individual', price: 15.00, available: true }, { id: 'M', name: 'Marmita M', desc: 'Farta', price: 22.90, popular: true, available: true }, { id: 'G', name: 'Marmita G', desc: 'Família', price: 26.90, available: true }], misturas: [], image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80', disponivel: true, ordem: 1 },
+        { id: 'refrigerante_lata', categoria: 'bebidas', nome: 'Refrigerante Lata 350ml', descricao: 'Geladíssimo', tipo: 'direct', preco: 6.00, sizes: [], misturas: [], image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&q=80', disponivel: true, ordem: 2 }
+      ],
+      pizzaria: [
+        { id: 'pizza_calabresa', categoria: 'marmitas', nome: 'Pizza de Calabresa Especial', descricao: 'Molho de tomate artesanal, calabresa fatiada, cebola e azeitonas pretas.', tipo: 'marmita_sizes', preco: 35.00, sizes: [{ id: 'P', name: 'Broto (4 fatias)', price: 28.00, available: true }, { id: 'M', name: 'Média (6 fatias)', price: 42.00, available: true }, { id: 'G', name: 'Grande (8 fatias)', price: 54.00, popular: true, available: true }], misturas: [], image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80', disponivel: true, ordem: 1 },
+        { id: 'coca_2l', categoria: 'bebidas', nome: 'Coca-Cola 2L', descricao: 'Super gelada', tipo: 'direct', preco: 14.00, sizes: [], misturas: [], image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&q=80', disponivel: true, ordem: 2 }
+      ],
+      hamburgueria: [
+        { id: 'burger_classico', categoria: 'marmitas', nome: 'Burger Smash Duplo c/ Cheddar', descricao: '2 carnes artesanais, cheddar derretido, bacon crocante e molho da casa no pão brioche.', tipo: 'marmita_sizes', preco: 24.90, sizes: [{ id: 'P', name: 'Simples (1 Carne)', price: 19.90, available: true }, { id: 'M', name: 'Duplo (2 Carnes)', price: 26.90, popular: true, available: true }, { id: 'G', name: 'Combo c/ Fritas e Refri', price: 36.90, available: true }], misturas: [], image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80', disponivel: true, ordem: 1 },
+        { id: 'batata_frita', categoria: 'adicionais', nome: 'Porção de Batata Frita Crocante', descricao: 'Fritas sequinhas com tempero especial.', tipo: 'direct', preco: 15.00, sizes: [], misturas: [], image: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&q=80', disponivel: true, ordem: 2 }
+      ],
+      acai: [
+        { id: 'acai_copo', categoria: 'marmitas', nome: 'Copo de Açaí Cremoso', descricao: 'Açaí puro e batido na hora com banana, morango, leite condensado e granola.', tipo: 'marmita_sizes', preco: 14.00, sizes: [{ id: 'P', name: '300ml', price: 14.00, available: true }, { id: 'M', name: '500ml', price: 20.00, popular: true, available: true }, { id: 'G', name: '700ml', price: 26.00, available: true }], misturas: [], image: 'https://images.unsplash.com/photo-1590301157890-4810ed352733?w=400&q=80', disponivel: true, ordem: 1 }
+      ],
+      bebidas: [
+        { id: 'cerveja_pack', categoria: 'bebidas', nome: 'Fardo Cerveja Lata (12 un)', descricao: 'Super gelada para o seu fim de semana', tipo: 'direct', preco: 48.00, sizes: [], misturas: [], image: 'https://images.unsplash.com/photo-1608270199042-4f36a87756f7?w=400&q=80', disponivel: true, ordem: 1 },
+        { id: 'gelo_5kg', categoria: 'adicionais', nome: 'Saco de Gelo Filtrado 5kg', descricao: 'Gelo em cubos cristalino', tipo: 'direct', preco: 12.00, sizes: [], misturas: [], image: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=400&q=80', disponivel: true, ordem: 2 }
+      ],
+      geral: [
+        { id: 'item_exemplo_1', categoria: 'marmitas', nome: 'Produto em Destaque', descricao: 'Descrição detalhada do seu produto ou serviço.', tipo: 'direct', preco: 25.00, sizes: [], misturas: [], image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80', disponivel: true, ordem: 1 }
+      ]
+    };
+
+    async function handleCreateStore(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnSubmitStore');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="animate-spin mr-2">⏳</span> Criando sua loja...';
+
+      const name = document.getElementById('storeName').value.trim();
+      let slug = document.getElementById('storeSlug').value.trim();
+      if (!slug) slug = autoGenerateSlug(name);
+      const niche = document.getElementById('storeNiche').value;
+      const rawPhone = document.getElementById('storeWhatsapp').value.replace(/\D/g, '');
+      const whatsapp = rawPhone.startsWith('55') ? rawPhone : ('55' + rawPhone);
+      const pixKey = document.getElementById('storePix').value.trim();
+      const fee = parseFloat(document.getElementById('storeFee').value) || 5.00;
+      const password = document.getElementById('storePassword').value.trim() || '123456';
+
+      try {
+        if (supabaseClient) {
+          // 1. Criar Loja
+          const { error: errLoja } = await supabaseClient.from('lojas').upsert([{
+            id: slug,
+            nome: name,
+            nicho: niche,
+            senha_admin: password,
+            ativo: true
+          }]);
+
+          if (errLoja) throw errLoja;
+
+          // 2. Criar Configurações
+          await supabaseClient.from('loja_config').upsert([{
+            loja_id: slug,
+            whatsapp: whatsapp,
+            pix_key: pixKey,
+            delivery_fee: fee,
+            hora_abertura: '11:00',
+            hora_fechamento: '23:00',
+            status_modo: 'auto',
+            mensagem_fechado: 'Estamos fechados no momento. Volte em breve!'
+          }]);
+
+          // 3. Injetar Produtos Iniciais do Nicho
+          const templateItems = (NICHE_TEMPLATES[niche] || NICHE_TEMPLATES.geral).map(item => ({
+            ...item,
+            loja_id: slug
+          }));
+
+          await supabaseClient.from('cardapio').upsert(templateItems);
+        }
+
+        // Sucesso: Montar URLs
+        const baseUrl = window.location.origin;
+        const menuUrl = `${baseUrl}/?loja=${slug}`;
+        const dashUrl = `${baseUrl}/dashboard?loja=${slug}`;
+
+        document.getElementById('formCard').classList.add('hidden');
+        document.getElementById('successCard').classList.remove('hidden');
+
+        document.getElementById('successStoreTitle').innerText = `${name} está pronta!`;
+        document.getElementById('menuLinkInput').value = menuUrl;
+        document.getElementById('dashboardLinkInput').value = dashUrl;
+        document.getElementById('btnOpenMenu').href = menuUrl;
+        document.getElementById('btnOpenDashboard').href = dashUrl;
+
+      } catch(err) {
+        console.error(err);
+        alert('Erro ao criar loja: ' + (err.message || err));
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="sparkles" class="w-4 h-4"></i><span>Criar Minha Loja Agora</span>';
+      } finally {
+        lucide.createIcons();
+      }
+    }
+
+    function copyToClipboard(inputId, btnId) {
+      const input = document.getElementById(inputId);
+      input.select();
+      input.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(input.value);
+
+      const btn = document.getElementById(btnId);
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<i data-lucide="check" class="w-3.5 h-3.5"></i><span>Copiado!</span>';
+      lucide.createIcons();
+      setTimeout(() => {
+        btn.innerHTML = originalText;
+        lucide.createIcons();
+      }, 2000);
+    }
+
+    lucide.createIcons();
+  </script>
+</body>
+</html>
