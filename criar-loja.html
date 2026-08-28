@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Criar Minha Loja - Cardápio Digital & Automação de Pedidos</title>
-  <meta name="theme-color" content="#C0392B">
+  <title>Criar Minha Loja - Passo a Passo Rápido & Fácil</title>
+  <meta name="theme-color" content="#4F46E5">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -12,10 +12,12 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Supabase JS CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
   <script>
     tailwind.config = {
@@ -23,13 +25,13 @@
         extend: {
           colors: {
             brand: {
-              50: '#fdf3f2',
-              100: '#fce4e2',
-              500: '#e64a19',
-              600: '#d84315',
-              700: '#c0392b',
-              800: '#a93226',
-              900: '#641e16',
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#312e81',
             }
           },
           fontFamily: {
@@ -40,114 +42,226 @@
     }
   </script>
   <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
     @keyframes slideUp {
-      from { transform: translateY(20px); opacity: 0; }
+      from { transform: translateY(16px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
     }
     .animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
   </style>
 </head>
-<body class="bg-gray-50 text-gray-800 min-h-screen py-8 px-4 flex flex-col justify-center items-center">
+<body class="bg-slate-50 text-slate-800 min-h-screen py-6 px-4 flex flex-col justify-center items-center">
 
-  <div class="w-full max-w-xl">
+  <div class="w-full max-w-lg">
 
-    <!-- HEADER LOGO -->
+    <!-- TOP HEADER -->
     <div class="text-center mb-6">
-      <div class="w-16 h-16 bg-brand-700 text-white rounded-3xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-brand-700/20 text-2xl font-black">
-        ⚡
-      </div>
-      <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">Criar Meu Negócio Online</h1>
-      <p class="text-xs text-gray-500 mt-1 max-w-sm mx-auto">Ative seu catálogo digital e sistema de pedidos com WhatsApp em menos de 2 minutos!</p>
+      <a href="index.html" class="inline-flex items-center justify-center space-x-2 mb-2">
+        <div class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-black text-xl shadow-lg shadow-indigo-600/20">
+          ⚡
+        </div>
+        <span class="font-black text-slate-900 text-xl tracking-tight">Comércio<span class="text-indigo-600">SaaS</span></span>
+      </a>
+      <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight" id="mainWizardHeading">Crie sua Loja no WhatsApp</h1>
+      <p class="text-xs text-slate-500 mt-1 max-w-xs mx-auto" id="mainWizardSubheading">Tudo pronto em 3 passos simples, sem complicação de informática!</p>
     </div>
 
-    <!-- FORM CARD -->
-    <div id="formCard" class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-gray-100 animate-slide-up">
-      <form onsubmit="handleCreateStore(event)" class="space-y-4 text-xs">
-        
-        <!-- Store Name -->
+    <!-- STEP PROGRESS BAR -->
+    <div id="progressSection" class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 mb-4">
+      <div class="flex items-center justify-between text-xs font-bold text-slate-500 mb-2">
+        <span id="stepLabelText">Passo 1 de 3: Identidade da Loja</span>
+        <span id="stepPercentText" class="text-indigo-600">33%</span>
+      </div>
+      <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+        <div id="progressBarFill" class="bg-indigo-600 h-full rounded-full transition-all duration-300 w-1/3"></div>
+      </div>
+    </div>
+
+    <!-- WIZARD CONTAINER CARD -->
+    <div id="wizardCard" class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-100 animate-slide-up">
+      
+      <!-- ========================================== -->
+      <!-- PASSO 1: IDENTIDADE & NICHO                -->
+      <!-- ========================================== -->
+      <div id="step1Container" class="space-y-5">
         <div>
-          <label class="block font-bold text-gray-700 mb-1">Nome do seu Estabelecimento / Loja *</label>
-          <input type="text" id="storeName" required placeholder="Ex: Pizzaria Bella Italia, Burger House..." class="w-full p-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-brand-500 font-bold text-sm bg-gray-50/50" oninput="autoGenerateSlug(this.value)">
+          <label class="block font-extrabold text-slate-900 text-xs mb-1.5">
+            Qual é o nome da sua Loja ou Estabelecimento? *
+          </label>
+          <input type="text" id="storeName" required placeholder="Ex: Bolos da Maria, Pizzaria do Zé, Marmitas & Cia..." class="w-full p-3.5 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 font-bold text-sm bg-slate-50/50" oninput="autoGenerateSlug(this.value)">
+          <p class="text-[11px] text-slate-400 mt-1">É o nome que seus clientes vão ver no topo do cardápio.</p>
         </div>
 
-        <!-- Custom Slug / URL -->
         <div>
-          <label class="block font-bold text-gray-700 mb-1">Identificador do seu Link (URL)</label>
-          <div class="flex items-center rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2 text-xs">
-            <span class="text-gray-400 select-none font-mono text-[11px]">.../?loja=</span>
-            <input type="text" id="storeSlug" required placeholder="meu-negocio" class="flex-1 bg-transparent font-mono font-bold text-brand-700 focus:outline-none text-xs">
+          <label class="block font-extrabold text-slate-900 text-xs mb-2">
+            O que você vende principalmente? *
+          </label>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5" id="nicheSelectorGrid">
+            
+            <button type="button" onclick="selectNiche('marmitaria')" id="niche_marmitaria" class="niche-card p-3 rounded-2xl border-2 border-indigo-600 bg-indigo-50/70 text-left transition flex flex-col justify-between">
+              <span class="text-2xl">🍛</span>
+              <span class="font-extrabold text-xs text-slate-900 mt-2 block">Marmitaria</span>
+              <span class="text-[10px] text-slate-500">Tamanhos P, M e G</span>
+            </button>
+
+            <button type="button" onclick="selectNiche('pizzaria')" id="niche_pizzaria" class="niche-card p-3 rounded-2xl border-2 border-slate-200 bg-white hover:bg-slate-50 text-left transition flex flex-col justify-between">
+              <span class="text-2xl">🍕</span>
+              <span class="font-extrabold text-xs text-slate-900 mt-2 block">Pizzaria</span>
+              <span class="text-[10px] text-slate-500">Brotos e Grandes</span>
+            </button>
+
+            <button type="button" onclick="selectNiche('hamburgueria')" id="niche_hamburgueria" class="niche-card p-3 rounded-2xl border-2 border-slate-200 bg-white hover:bg-slate-50 text-left transition flex flex-col justify-between">
+              <span class="text-2xl">🍔</span>
+              <span class="font-extrabold text-xs text-slate-900 mt-2 block">Hamburgueria</span>
+              <span class="text-[10px] text-slate-500">Lanches & Combos</span>
+            </button>
+
+            <button type="button" onclick="selectNiche('acai')" id="niche_acai" class="niche-card p-3 rounded-2xl border-2 border-slate-200 bg-white hover:bg-slate-50 text-left transition flex flex-col justify-between">
+              <span class="text-2xl">🍧</span>
+              <span class="font-extrabold text-xs text-slate-900 mt-2 block">Açaí & Doces</span>
+              <span class="text-[10px] text-slate-500">Copos e Sobremesas</span>
+            </button>
+
+            <button type="button" onclick="selectNiche('bebidas')" id="niche_bebidas" class="niche-card p-3 rounded-2xl border-2 border-slate-200 bg-white hover:bg-slate-50 text-left transition flex flex-col justify-between">
+              <span class="text-2xl">🥤</span>
+              <span class="font-extrabold text-xs text-slate-900 mt-2 block">Distribuidora</span>
+              <span class="text-[10px] text-slate-500">Bebidas & Gelo</span>
+            </button>
+
+            <button type="button" onclick="selectNiche('geral')" id="niche_geral" class="niche-card p-3 rounded-2xl border-2 border-slate-200 bg-white hover:bg-slate-50 text-left transition flex flex-col justify-between">
+              <span class="text-2xl">🛍️</span>
+              <span class="font-extrabold text-xs text-slate-900 mt-2 block">Geral / Outros</span>
+              <span class="text-[10px] text-slate-500">Qualquer produto</span>
+            </button>
+
           </div>
-          <p class="text-[10px] text-gray-400 mt-1">Este será o endereço exclusivo da sua loja.</p>
+          <p class="text-[11px] text-slate-400 mt-2">💡 Já vamos pré-cadastrar fotos e itens do seu nicho para você não precisar começar do zero!</p>
         </div>
 
-        <!-- Niche / Segment -->
-        <div>
-          <label class="block font-bold text-gray-700 mb-1">Segmento / Nicho Principal *</label>
-          <select id="storeNiche" class="w-full p-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-brand-500 font-bold bg-white text-xs">
-            <option value="marmitaria">🍛 Marmitaria & Comida Caseira (P, M e G)</option>
-            <option value="pizzaria">🍕 Pizzaria & Calzones</option>
-            <option value="hamburgueria">🍔 Hamburgueria & Lanches</option>
-            <option value="acai">🍧 Açaí & Sobremesas</option>
-            <option value="bebidas">🥤 Distribuidora de Bebidas</option>
-            <option value="geral">🛒 Geral / Produtos Diversos</option>
-          </select>
-          <p class="text-[10px] text-gray-400 mt-1">Já pré-carregamos itens e fotos iniciais prontos para o seu nicho!</p>
-        </div>
+        <!-- Hidden Custom Slug (Auto-generated) -->
+        <input type="hidden" id="storeSlug">
 
-        <!-- WhatsApp & Pix -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-          <div>
-            <label class="block font-bold text-gray-700 mb-1">WhatsApp para Receber Pedidos *</label>
-            <input type="tel" id="storeWhatsapp" required placeholder="DDD + Número (ex: 41999999999)" class="w-full p-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-brand-500 font-medium bg-gray-50/50">
-          </div>
-          <div>
-            <label class="block font-bold text-gray-700 mb-1">Chave Pix para Pagamento *</label>
-            <input type="text" id="storePix" required placeholder="CPF, Celular ou CNPJ" class="w-full p-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-brand-500 font-medium bg-gray-50/50">
-          </div>
-        </div>
-
-        <!-- Delivery Fee & Password -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block font-bold text-gray-700 mb-1">Taxa de Entrega Padrão (R$)</label>
-            <input type="number" step="0.50" id="storeFee" value="5.00" class="w-full p-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-brand-500 font-bold bg-gray-50/50">
-          </div>
-          <div>
-            <label class="block font-bold text-gray-700 mb-1">Senha de Acesso ao Painel *</label>
-            <input type="password" id="storePassword" required placeholder="Crie sua senha de administrador" class="w-full p-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-brand-500 font-bold bg-gray-50/50">
-          </div>
-        </div>
-
-        <!-- Submit Button -->
-        <div class="pt-4">
-          <button type="submit" id="btnSubmitStore" class="w-full bg-brand-700 hover:bg-brand-800 text-white font-bold py-3.5 rounded-2xl text-sm transition shadow-lg shadow-brand-700/20 active:scale-95 flex items-center justify-center space-x-2">
-            <i data-lucide="sparkles" class="w-4 h-4"></i>
-            <span>Criar Minha Loja Agora</span>
+        <div class="pt-2">
+          <button type="button" onclick="goToStep(2)" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl text-xs sm:text-sm transition shadow-lg shadow-indigo-600/25 active:scale-95 flex items-center justify-center gap-2">
+            <span>Continuar para Passo 2</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
           </button>
         </div>
+      </div>
 
-      </form>
+      <!-- ========================================== -->
+      <!-- PASSO 2: CONTATO & RECEBIMENTO (PIX)       -->
+      <!-- ========================================== -->
+      <div id="step2Container" class="space-y-5 hidden">
+        <div>
+          <label class="block font-extrabold text-slate-900 text-xs mb-1.5">
+            📱 WhatsApp para onde os pedidos serão enviados *
+          </label>
+          <input type="tel" id="storeWhatsapp" required placeholder="(DDD) 99999-9999" class="w-full p-3.5 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 font-bold text-sm bg-slate-50/50" oninput="maskPhone(this)">
+          <p class="text-[11px] text-slate-400 mt-1">Quando o cliente apertar em "Fazer Pedido", a mensagem cairá direto nesse WhatsApp.</p>
+        </div>
+
+        <div>
+          <label class="block font-extrabold text-slate-900 text-xs mb-1.5">
+            ⚡ Chave Pix para receber os pagamentos *
+          </label>
+          <input type="text" id="storePix" required placeholder="CPF, Celular, E-mail ou Chave Aleatória" class="w-full p-3.5 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 font-bold text-sm bg-slate-50/50">
+          <p class="text-[11px] text-slate-400 mt-1">O cliente verá essa chave para pagar na hora de fechar a compra.</p>
+        </div>
+
+        <div>
+          <label class="block font-extrabold text-slate-900 text-xs mb-1.5">
+            🛵 Taxa de Entrega Padrão (R$)
+          </label>
+          <input type="number" step="0.50" id="storeFee" value="5.00" class="w-full p-3.5 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 font-bold text-sm bg-slate-50/50">
+          <p class="text-[11px] text-slate-400 mt-1">Coloque 0,00 se a entrega for grátis (você pode alterar depois no painel).</p>
+        </div>
+
+        <div class="pt-2 flex items-center gap-2">
+          <button type="button" onclick="goToStep(1)" class="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-4 rounded-2xl text-xs transition">
+            Voltar
+          </button>
+          <button type="button" onclick="goToStep(3)" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl text-xs sm:text-sm transition shadow-lg shadow-indigo-600/25 active:scale-95 flex items-center justify-center gap-2">
+            <span>Continuar para Passo 3</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- PASSO 3: SEUS DADOS & SENHA DO PAINEL      -->
+      <!-- ========================================== -->
+      <div id="step3Container" class="space-y-5 hidden">
+        <div>
+          <label class="block font-extrabold text-slate-900 text-xs mb-1.5">
+            Seu Nome ou do Responsável *
+          </label>
+          <input type="text" id="ownerName" required placeholder="Ex: Maria Silva" class="w-full p-3.5 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 font-medium text-sm bg-slate-50/50">
+        </div>
+
+        <div>
+          <label class="block font-extrabold text-slate-900 text-xs mb-1.5">
+            Seu E-mail *
+          </label>
+          <input type="email" id="ownerEmail" required placeholder="seuemail@exemplo.com" class="w-full p-3.5 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 font-medium text-sm bg-slate-50/50">
+        </div>
+
+        <div>
+          <label class="block font-extrabold text-slate-900 text-xs mb-1.5">
+            CPF ou CNPJ (Opcional)
+          </label>
+          <input type="text" id="ownerDoc" placeholder="000.000.000-00" class="w-full p-3.5 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 font-medium text-sm bg-slate-50/50">
+        </div>
+
+        <div>
+          <label class="block font-extrabold text-slate-900 text-xs mb-1.5">
+            Crie sua Senha de Acesso ao Painel *
+          </label>
+          <input type="password" id="storePassword" required placeholder="Crie uma senha simples (ex: 123456)" class="w-full p-3.5 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 font-bold text-sm bg-slate-50/50">
+          <p class="text-[11px] text-slate-400 mt-1">Essa será a senha para você entrar no seu painel e ver os pedidos.</p>
+        </div>
+
+        <div class="pt-2 flex items-center gap-2">
+          <button type="button" onclick="goToStep(2)" class="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-4 rounded-2xl text-xs transition">
+            Voltar
+          </button>
+          <button type="button" onclick="submitCreateStore()" id="btnSubmitFinal" class="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-extrabold py-4 rounded-2xl text-xs sm:text-sm transition shadow-xl shadow-emerald-600/25 active:scale-95 flex items-center justify-center gap-2">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            <span>🚀 Ativar Minha Loja Agora</span>
+          </button>
+        </div>
+      </div>
+
     </div>
 
-    <!-- SUCCESS CARD -->
-    <div id="successCard" class="bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-emerald-100 hidden animate-slide-up text-center space-y-5">
-      <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto border border-emerald-100 shadow-inner text-2xl">
+    <!-- ========================================== -->
+    <!-- SUCCESS / CELEBRATION CARD                 -->
+    <!-- ========================================== -->
+    <div id="successCard" class="bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-emerald-100 hidden animate-slide-up text-center space-y-6">
+      
+      <div class="w-20 h-20 bg-emerald-50 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto border-2 border-emerald-100 shadow-inner text-4xl">
         🎉
       </div>
+
       <div>
-        <h2 class="text-xl font-black text-gray-900" id="successStoreTitle">Sua loja está pronta!</h2>
-        <p class="text-xs text-gray-500 mt-1">Seus links exclusivos já estão no ar e prontos para vender.</p>
+        <span class="bg-emerald-100 text-emerald-800 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">Loja Criada com Sucesso</span>
+        <h2 class="text-2xl font-black text-slate-900 mt-2" id="successStoreName">Sua loja está pronta!</h2>
+        <p class="text-xs text-slate-500 mt-1 max-w-xs mx-auto">Seu cardápio já está funcionando na internet e pronto para receber pedidos!</p>
       </div>
 
-      <!-- Links Box -->
+      <!-- Links Container -->
       <div class="space-y-3 text-left">
+        
         <!-- Client Menu Link -->
-        <div class="p-3.5 bg-brand-50/60 rounded-2xl border border-brand-200 space-y-1">
-          <span class="text-[10px] font-black text-brand-900 uppercase tracking-wider block">📱 Link do Cardápio / Catálogo (Para os Clientes)</span>
-          <div class="flex items-center justify-between gap-2">
-            <input type="text" id="menuLinkInput" readonly class="w-full bg-white font-mono text-xs font-bold text-gray-800 p-2 rounded-xl border border-brand-200 select-all">
-            <button onclick="copyToClipboard('menuLinkInput', 'btnCopyMenu')" id="btnCopyMenu" class="bg-brand-700 hover:bg-brand-800 text-white font-bold px-3 py-2 rounded-xl text-xs flex items-center gap-1 shadow-sm whitespace-nowrap">
+        <div class="p-4 bg-indigo-50/70 rounded-2xl border border-indigo-100 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-black text-indigo-900 uppercase tracking-wider flex items-center gap-1">
+              <span>📱 Seu Cardápio para os Clientes</span>
+            </span>
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="text" id="finalMenuUrl" readonly class="w-full bg-white font-bold text-xs text-slate-800 p-3 rounded-xl border border-indigo-200 select-all font-mono">
+            <button onclick="copyToClipboard('finalMenuUrl', 'btnCopyMenu')" id="btnCopyMenu" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-3 rounded-xl text-xs flex items-center gap-1 shadow-sm whitespace-nowrap active:scale-95 transition">
               <i data-lucide="copy" class="w-3.5 h-3.5"></i>
               <span>Copiar</span>
             </button>
@@ -155,28 +269,40 @@
         </div>
 
         <!-- Dashboard Link -->
-        <div class="p-3.5 bg-gray-50 rounded-2xl border border-gray-200 space-y-1">
-          <span class="text-[10px] font-black text-gray-700 uppercase tracking-wider block">💻 Link do Painel de Gestão (Para você gerenciar)</span>
-          <div class="flex items-center justify-between gap-2">
-            <input type="text" id="dashboardLinkInput" readonly class="w-full bg-white font-mono text-xs font-bold text-gray-800 p-2 rounded-xl border border-gray-200 select-all">
-            <button onclick="copyToClipboard('dashboardLinkInput', 'btnCopyDash')" id="btnCopyDash" class="bg-gray-800 hover:bg-gray-900 text-white font-bold px-3 py-2 rounded-xl text-xs flex items-center gap-1 shadow-sm whitespace-nowrap">
+        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-black text-slate-700 uppercase tracking-wider flex items-center gap-1">
+              <span>💻 Seu Painel de Pedidos & Gestão</span>
+            </span>
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="text" id="finalDashUrl" readonly class="w-full bg-white font-bold text-xs text-slate-800 p-3 rounded-xl border border-slate-200 select-all font-mono">
+            <button onclick="copyToClipboard('finalDashUrl', 'btnCopyDash')" id="btnCopyDash" class="bg-slate-800 hover:bg-slate-900 text-white font-bold px-4 py-3 rounded-xl text-xs flex items-center gap-1 shadow-sm whitespace-nowrap active:scale-95 transition">
               <i data-lucide="copy" class="w-3.5 h-3.5"></i>
               <span>Copiar</span>
             </button>
           </div>
         </div>
+
       </div>
 
-      <!-- Action Buttons -->
-      <div class="pt-2 flex flex-col sm:flex-row gap-2">
-        <a id="btnOpenMenu" href="#" target="_blank" class="flex-1 bg-brand-700 hover:bg-brand-800 text-white font-bold py-3 rounded-xl text-xs text-center transition shadow-md flex items-center justify-center gap-1.5">
-          <i data-lucide="external-link" class="w-4 h-4"></i>
-          <span>Abrir Cardápio</span>
+      <!-- Quick Action Buttons -->
+      <div class="space-y-2 pt-2">
+        <a id="btnShareWhatsapp" href="#" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3.5 px-4 rounded-2xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 active:scale-95 transition">
+          <i data-lucide="message-circle" class="w-4 h-4"></i>
+          <span>📲 Compartilhar no WhatsApp</span>
         </a>
-        <a id="btnOpenDashboard" href="#" target="_blank" class="flex-1 bg-gray-900 hover:bg-black text-white font-bold py-3 rounded-xl text-xs text-center transition shadow-md flex items-center justify-center gap-1.5">
-          <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-          <span>Abrir Painel de Gestão</span>
-        </a>
+        
+        <div class="flex flex-col sm:flex-row gap-2">
+          <a id="btnOpenMenuFinal" href="#" target="_blank" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl text-xs text-center transition shadow-md flex items-center justify-center gap-1.5">
+            <i data-lucide="external-link" class="w-4 h-4"></i>
+            <span>Ver Cardápio</span>
+          </a>
+          <a id="btnOpenDashFinal" href="#" target="_blank" class="flex-1 bg-slate-900 hover:bg-black text-white font-bold py-3 rounded-xl text-xs text-center transition shadow-md flex items-center justify-center gap-1.5">
+            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+            <span>Abrir Painel</span>
+          </a>
+        </div>
       </div>
 
     </div>
@@ -184,6 +310,7 @@
   </div>
 
   <script>
+    // SUPABASE SETUP (DEDICATED COMERCIO-SAAS DATABASE)
     const SUPABASE_URL = 'https://drecypzvptgyfltjlebh.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRyZWN5cHp2cHRneWZsdGpsZWJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5MzIwMTAsImV4cCI6MjEwMzUwODAxMH0.eVsHivVn8vvRmHU6e8qL74kFchrGB0NOohkoje6Hytc';
     let supabaseClient = null;
@@ -193,7 +320,75 @@
         supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       }
     } catch(e) {
-      console.warn('Supabase not ready:', e);
+      console.warn('Supabase init:', e);
+    }
+
+    let selectedNiche = 'marmitaria';
+    let currentStep = 1;
+
+    // STEP NAVIGATION
+    function goToStep(step) {
+      if (step === 2) {
+        const name = document.getElementById('storeName').value.trim();
+        if (!name) {
+          alert('Por favor, digite o nome da sua loja.');
+          document.getElementById('storeName').focus();
+          return;
+        }
+        document.getElementById('step1Container').classList.add('hidden');
+        document.getElementById('step2Container').classList.remove('hidden');
+        document.getElementById('step3Container').classList.add('hidden');
+
+        document.getElementById('stepLabelText').innerText = 'Passo 2 de 3: WhatsApp & Pagamento';
+        document.getElementById('stepPercentText').innerText = '66%';
+        document.getElementById('progressBarFill').className = 'bg-indigo-600 h-full rounded-full transition-all duration-300 w-2/3';
+      } else if (step === 3) {
+        const phone = document.getElementById('storeWhatsapp').value.replace(/\D/g, '');
+        const pix = document.getElementById('storePix').value.trim();
+        if (phone.length < 10) {
+          alert('Por favor, digite um número de WhatsApp válido com DDD.');
+          document.getElementById('storeWhatsapp').focus();
+          return;
+        }
+        if (!pix) {
+          alert('Por favor, informe sua chave Pix para receber pagamentos.');
+          document.getElementById('storePix').focus();
+          return;
+        }
+        document.getElementById('step1Container').classList.add('hidden');
+        document.getElementById('step2Container').classList.add('hidden');
+        document.getElementById('step3Container').classList.remove('hidden');
+
+        document.getElementById('stepLabelText').innerText = 'Passo 3 de 3: Dados de Acesso & Senha';
+        document.getElementById('stepPercentText').innerText = '90%';
+        document.getElementById('progressBarFill').className = 'bg-indigo-600 h-full rounded-full transition-all duration-300 w-11/12';
+      } else {
+        document.getElementById('step1Container').classList.remove('hidden');
+        document.getElementById('step2Container').classList.add('hidden');
+        document.getElementById('step3Container').classList.add('hidden');
+
+        document.getElementById('stepLabelText').innerText = 'Passo 1 de 3: Identidade da Loja';
+        document.getElementById('stepPercentText').innerText = '33%';
+        document.getElementById('progressBarFill').className = 'bg-indigo-600 h-full rounded-full transition-all duration-300 w-1/3';
+      }
+      currentStep = step;
+      lucide.createIcons();
+    }
+
+    // NICHE SELECTION
+    function selectNiche(niche) {
+      selectedNiche = niche;
+      const niches = ['marmitaria', 'pizzaria', 'hamburgueria', 'acai', 'bebidas', 'geral'];
+      niches.forEach(n => {
+        const btn = document.getElementById('niche_' + n);
+        if (btn) {
+          if (n === niche) {
+            btn.className = 'niche-card p-3 rounded-2xl border-2 border-indigo-600 bg-indigo-50/70 text-left transition flex flex-col justify-between';
+          } else {
+            btn.className = 'niche-card p-3 rounded-2xl border-2 border-slate-200 bg-white hover:bg-slate-50 text-left transition flex flex-col justify-between';
+          }
+        }
+      });
     }
 
     function autoGenerateSlug(name) {
@@ -202,65 +397,80 @@
         .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-+|-+$/g, '');
-      document.getElementById('storeSlug').value = slug;
+      document.getElementById('storeSlug').value = slug || 'minha-loja';
+    }
+
+    function maskPhone(input) {
+      let v = input.value.replace(/\D/g, '');
+      if (v.length > 11) v = v.slice(0, 11);
+      if (v.length > 10) {
+        input.value = `(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`;
+      } else if (v.length > 5) {
+        input.value = `(${v.slice(0,2)}) ${v.slice(2,6)}-${v.slice(6)}`;
+      } else if (v.length > 2) {
+        input.value = `(${v.slice(0,2)}) ${v.slice(2)}`;
+      } else {
+        input.value = v;
+      }
     }
 
     // TEMPLATES POR NICHO
     const NICHE_TEMPLATES = {
       marmitaria: [
-        { id: 'prato_executivo', categoria: 'marmitas', nome: 'Marmita Tradicional do Dia', descricao: 'Acompanha arroz, feijão caseiro, purê de batata, farofa especial, macarrão e salada.', tipo: 'marmita_sizes', preco: 15.00, sizes: [{ id: 'P', name: 'Marmita P', desc: 'Individual', price: 15.00, available: true }, { id: 'M', name: 'Marmita M', desc: 'Farta', price: 22.90, popular: true, available: true }, { id: 'G', name: 'Marmita G', desc: 'Família', price: 26.90, available: true }], misturas: [], image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80', disponivel: true, ordem: 1 },
-        { id: 'refrigerante_lata', categoria: 'bebidas', nome: 'Refrigerante Lata 350ml', descricao: 'Geladíssimo', tipo: 'direct', preco: 6.00, sizes: [], misturas: [], image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&q=80', disponivel: true, ordem: 2 }
+        { id: 'marmita_tradicional', categoria: 'Marmitas', nome: 'Marmita Tradicional do Dia', descricao: 'Acompanha arroz, feijão caseiro, purê de batata, farofa especial, macarrão e salada.', tipo: 'marmita_sizes', preco: 15.00, sizes: [{ id: 'P', name: 'Marmita P (Individual)', price: 15.00, available: true }, { id: 'M', name: 'Marmita M (Reforçada)', price: 22.90, popular: true, available: true }, { id: 'G', name: 'Marmita G (Família)', price: 26.90, available: true }], image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80', disponivel: true, ordem: 1 },
+        { id: 'refrigerante_lata', categoria: 'Bebidas', nome: 'Refrigerante Lata 350ml', descricao: 'Super gelado', tipo: 'direct', preco: 6.00, sizes: [], image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&q=80', disponivel: true, ordem: 2 }
       ],
       pizzaria: [
-        { id: 'pizza_calabresa', categoria: 'marmitas', nome: 'Pizza de Calabresa Especial', descricao: 'Molho de tomate artesanal, calabresa fatiada, cebola e azeitonas pretas.', tipo: 'marmita_sizes', preco: 35.00, sizes: [{ id: 'P', name: 'Broto (4 fatias)', price: 28.00, available: true }, { id: 'M', name: 'Média (6 fatias)', price: 42.00, available: true }, { id: 'G', name: 'Grande (8 fatias)', price: 54.00, popular: true, available: true }], misturas: [], image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80', disponivel: true, ordem: 1 },
-        { id: 'coca_2l', categoria: 'bebidas', nome: 'Coca-Cola 2L', descricao: 'Super gelada', tipo: 'direct', preco: 14.00, sizes: [], misturas: [], image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&q=80', disponivel: true, ordem: 2 }
+        { id: 'pizza_calabresa', categoria: 'Pizzas Salgadas', nome: 'Pizza de Calabresa Especial', descricao: 'Molho artesanal, calabresa fatiada, cebola e azeitonas pretas.', tipo: 'marmita_sizes', preco: 35.00, sizes: [{ id: 'P', name: 'Broto (4 fatias)', price: 28.00, available: true }, { id: 'M', name: 'Média (6 fatias)', price: 42.00, available: true }, { id: 'G', name: 'Grande (8 fatias)', price: 54.00, popular: true, available: true }], image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80', disponivel: true, ordem: 1 },
+        { id: 'coca_2l', categoria: 'Bebidas', nome: 'Coca-Cola 2L', descricao: 'Super gelada', tipo: 'direct', preco: 14.00, sizes: [], image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&q=80', disponivel: true, ordem: 2 }
       ],
       hamburgueria: [
-        { id: 'burger_classico', categoria: 'marmitas', nome: 'Burger Smash Duplo c/ Cheddar', descricao: '2 carnes artesanais, cheddar derretido, bacon crocante e molho da casa no pão brioche.', tipo: 'marmita_sizes', preco: 24.90, sizes: [{ id: 'P', name: 'Simples (1 Carne)', price: 19.90, available: true }, { id: 'M', name: 'Duplo (2 Carnes)', price: 26.90, popular: true, available: true }, { id: 'G', name: 'Combo c/ Fritas e Refri', price: 36.90, available: true }], misturas: [], image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80', disponivel: true, ordem: 1 },
-        { id: 'batata_frita', categoria: 'adicionais', nome: 'Porção de Batata Frita Crocante', descricao: 'Fritas sequinhas com tempero especial.', tipo: 'direct', preco: 15.00, sizes: [], misturas: [], image: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&q=80', disponivel: true, ordem: 2 }
+        { id: 'burger_smash', categoria: 'Burgers', nome: 'Burger Smash Duplo Cheddar Bacon', descricao: '2 carnes smash 90g, cheddar derretido, bacon crocante no pão brioche.', tipo: 'marmita_sizes', preco: 24.90, sizes: [{ id: 'P', name: 'Simples (1 Burger)', price: 24.90, available: true }, { id: 'G', name: 'Combo c/ Fritas e Refri', price: 36.90, popular: true, available: true }], image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80', disponivel: true, ordem: 1 },
+        { id: 'batata_frita', categoria: 'Porções', nome: 'Porção de Batata Frita Crocante', descricao: 'Fritas sequinhas com tempero especial.', tipo: 'direct', preco: 15.00, sizes: [], image: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&q=80', disponivel: true, ordem: 2 }
       ],
       acai: [
-        { id: 'acai_copo', categoria: 'marmitas', nome: 'Copo de Açaí Cremoso', descricao: 'Açaí puro e batido na hora com banana, morango, leite condensado e granola.', tipo: 'marmita_sizes', preco: 14.00, sizes: [{ id: 'P', name: '300ml', price: 14.00, available: true }, { id: 'M', name: '500ml', price: 20.00, popular: true, available: true }, { id: 'G', name: '700ml', price: 26.00, available: true }], misturas: [], image: 'https://images.unsplash.com/photo-1590301157890-4810ed352733?w=400&q=80', disponivel: true, ordem: 1 }
+        { id: 'acai_copo', categoria: 'Açaí', nome: 'Copo de Açaí Tradicional', descricao: 'Açaí batido na hora com banana, morango, leite condensado e granola.', tipo: 'marmita_sizes', preco: 14.00, sizes: [{ id: 'P', name: 'Copo 300ml', price: 14.00, available: true }, { id: 'M', name: 'Copo 500ml', price: 20.00, popular: true, available: true }, { id: 'G', name: 'Copo 700ml', price: 26.00, available: true }], image: 'https://images.unsplash.com/photo-1590301157890-4810ed352733?w=400&q=80', disponivel: true, ordem: 1 }
       ],
       bebidas: [
-        { id: 'cerveja_pack', categoria: 'bebidas', nome: 'Fardo Cerveja Lata (12 un)', descricao: 'Super gelada para o seu fim de semana', tipo: 'direct', preco: 48.00, sizes: [], misturas: [], image: 'https://images.unsplash.com/photo-1608270199042-4f36a87756f7?w=400&q=80', disponivel: true, ordem: 1 },
-        { id: 'gelo_5kg', categoria: 'adicionais', nome: 'Saco de Gelo Filtrado 5kg', descricao: 'Gelo em cubos cristalino', tipo: 'direct', preco: 12.00, sizes: [], misturas: [], image: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=400&q=80', disponivel: true, ordem: 2 }
+        { id: 'cerveja_pack', categoria: 'Cervejas', nome: 'Fardo Cerveja Lata (12 un)', descricao: 'Super gelada para entrega imediata', tipo: 'direct', preco: 48.00, sizes: [], image: 'https://images.unsplash.com/photo-1608270199042-4f36a87756f7?w=400&q=80', disponivel: true, ordem: 1 },
+        { id: 'gelo_5kg', categoria: 'Gelo & Carvão', nome: 'Saco de Gelo Filtrado 5kg', descricao: 'Gelo em cubos cristalino', tipo: 'direct', preco: 12.00, sizes: [], image: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=400&q=80', disponivel: true, ordem: 2 }
       ],
       geral: [
-        { id: 'item_exemplo_1', categoria: 'marmitas', nome: 'Produto em Destaque', descricao: 'Descrição detalhada do seu produto ou serviço.', tipo: 'direct', preco: 25.00, sizes: [], misturas: [], image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80', disponivel: true, ordem: 1 }
+        { id: 'produto_exemplo_1', categoria: 'Destaques', nome: 'Produto em Destaque', descricao: 'Descrição do seu produto ou serviço.', tipo: 'direct', preco: 25.00, sizes: [], image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80', disponivel: true, ordem: 1 }
       ]
     };
 
-    async function handleCreateStore(e) {
-      e.preventDefault();
-      const btn = document.getElementById('btnSubmitStore');
+    // SUBMIT CREATION
+    async function submitCreateStore() {
+      const btn = document.getElementById('btnSubmitFinal');
       btn.disabled = true;
-      btn.innerHTML = '<span class="animate-spin mr-2">⏳</span> Criando sua loja...';
+      btn.innerHTML = '<span class="animate-spin mr-2">⏳</span> Criando sua loja mágica...';
 
       const name = document.getElementById('storeName').value.trim();
       let slug = document.getElementById('storeSlug').value.trim();
-      if (!slug) slug = autoGenerateSlug(name);
-      const niche = document.getElementById('storeNiche').value;
+      if (!slug) slug = 'loja-' + Date.now();
+
       const rawPhone = document.getElementById('storeWhatsapp').value.replace(/\D/g, '');
       const whatsapp = rawPhone.startsWith('55') ? rawPhone : ('55' + rawPhone);
       const pixKey = document.getElementById('storePix').value.trim();
       const fee = parseFloat(document.getElementById('storeFee').value) || 5.00;
+      const ownerName = document.getElementById('ownerName').value.trim() || name;
+      const ownerEmail = document.getElementById('ownerEmail').value.trim();
       const password = document.getElementById('storePassword').value.trim() || '123456';
 
       try {
         if (supabaseClient) {
-          // 1. Criar Loja
+          // 1. Inserir Loja
           const { error: errLoja } = await supabaseClient.from('lojas').upsert([{
             id: slug,
             nome: name,
-            nicho: niche,
+            nicho: selectedNiche,
             senha_admin: password,
             ativo: true
           }]);
-
           if (errLoja) throw errLoja;
 
-          // 2. Criar Configurações
+          // 2. Inserir Configuração da Loja
           await supabaseClient.from('loja_config').upsert([{
             loja_id: slug,
             whatsapp: whatsapp,
@@ -272,8 +482,8 @@
             mensagem_fechado: 'Estamos fechados no momento. Volte em breve!'
           }]);
 
-          // 3. Injetar Produtos Iniciais do Nicho
-          const templateItems = (NICHE_TEMPLATES[niche] || NICHE_TEMPLATES.geral).map(item => ({
+          // 3. Injetar Catálogo Inicial do Nicho
+          const templateItems = (NICHE_TEMPLATES[selectedNiche] || NICHE_TEMPLATES.geral).map(item => ({
             ...item,
             loja_id: slug
           }));
@@ -281,25 +491,40 @@
           await supabaseClient.from('cardapio').upsert(templateItems);
         }
 
-        // Sucesso: Montar URLs
+        // Montar URLs Finais
         const baseUrl = window.location.origin;
         const menuUrl = `${baseUrl}/?loja=${slug}`;
         const dashUrl = `${baseUrl}/dashboard?loja=${slug}`;
 
-        document.getElementById('formCard').classList.add('hidden');
+        // Atualizar UI de Sucesso
+        document.getElementById('progressSection').classList.add('hidden');
+        document.getElementById('wizardCard').classList.add('hidden');
+        document.getElementById('mainWizardHeading').classList.add('hidden');
+        document.getElementById('mainWizardSubheading').classList.add('hidden');
         document.getElementById('successCard').classList.remove('hidden');
 
-        document.getElementById('successStoreTitle').innerText = `${name} está pronta!`;
-        document.getElementById('menuLinkInput').value = menuUrl;
-        document.getElementById('dashboardLinkInput').value = dashUrl;
-        document.getElementById('btnOpenMenu').href = menuUrl;
-        document.getElementById('btnOpenDashboard').href = dashUrl;
+        document.getElementById('successStoreName').innerText = `${name} está no ar!`;
+        document.getElementById('finalMenuUrl').value = menuUrl;
+        document.getElementById('finalDashUrl').value = dashUrl;
+        document.getElementById('btnOpenMenuFinal').href = menuUrl;
+        document.getElementById('btnOpenDashFinal').href = dashUrl;
+
+        // Share WhatsApp
+        const shareText = `Olá! Conheça nosso cardápio online e faça seu pedido direto pelo link: ${menuUrl}`;
+        document.getElementById('btnShareWhatsapp').href = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+
+        // Trigger Confetti Celebration 🎉
+        confetti({
+          particleCount: 120,
+          spread: 80,
+          origin: { y: 0.6 }
+        });
 
       } catch(err) {
         console.error(err);
         alert('Erro ao criar loja: ' + (err.message || err));
         btn.disabled = false;
-        btn.innerHTML = '<i data-lucide="sparkles" class="w-4 h-4"></i><span>Criar Minha Loja Agora</span>';
+        btn.innerHTML = '<i data-lucide="sparkles" class="w-4 h-4"></i><span>🚀 Ativar Minha Loja Agora</span>';
       } finally {
         lucide.createIcons();
       }
@@ -312,11 +537,11 @@
       navigator.clipboard.writeText(input.value);
 
       const btn = document.getElementById(btnId);
-      const originalText = btn.innerHTML;
+      const originalHtml = btn.innerHTML;
       btn.innerHTML = '<i data-lucide="check" class="w-3.5 h-3.5"></i><span>Copiado!</span>';
       lucide.createIcons();
       setTimeout(() => {
-        btn.innerHTML = originalText;
+        btn.innerHTML = originalHtml;
         lucide.createIcons();
       }, 2000);
     }
