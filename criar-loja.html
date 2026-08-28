@@ -208,9 +208,11 @@
 
         <div>
           <label class="block font-extrabold text-slate-900 text-xs mb-1.5">
-            CPF ou CNPJ (Opcional)
+            CPF ou CNPJ do Titular *
           </label>
-          <input type="text" id="ownerDoc" placeholder="000.000.000-00" class="w-full p-3.5 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 font-medium text-sm bg-slate-50/50">
+          <input type="text" id="ownerDoc" required placeholder="Digite CPF ou CNPJ" class="w-full p-3.5 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 font-bold text-sm bg-slate-50/50" oninput="handleDocInput(this)">
+          <div id="docStatusContainer" class="mt-1.5 hidden text-xs font-bold flex items-center gap-1.5"></div>
+          <p class="text-[11px] text-slate-400 mt-1" id="docHelpText">Validamos a regularidade cadastral para sua segurança.</p>
         </div>
 
         <div>
@@ -400,6 +402,153 @@
       document.getElementById('storeSlug').value = slug || 'minha-loja';
     }
 
+    let isDocValid = false;
+    let validatedDocData = null;
+    let docDebounceTimer = null;
+
+    function handleDocInput(input) {
+      let v = input.value.replace(/\D/g, '');
+      const statusBox = document.getElementById('docStatusContainer');
+      const helpText = document.getElementById('docHelpText');
+      
+      clearTimeout(docDebounceTimer);
+      isDocValid = false;
+      validatedDocData = null;
+
+      // CPF mask (up to 11 digits)
+      if (v.length <= 11) {
+        if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
+        else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+        else if (v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+        input.value = v;
+
+        const clean = v.replace(/\D/g, '');
+        if (clean.length === 11) {
+          if (validateCPF(clean)) {
+            isDocValid = true;
+            statusBox.className = 'mt-1.5 text-xs font-bold text-emerald-600 flex items-center gap-1.5';
+            statusBox.innerHTML = '<i data-lucide="check-circle" class="w-3.5 h-3.5"></i><span>CPF Válido</span>';
+            statusBox.classList.remove('hidden');
+            helpText.classList.add('hidden');
+          } else {
+            statusBox.className = 'mt-1.5 text-xs font-bold text-rose-600 flex items-center gap-1.5';
+            statusBox.innerHTML = '<i data-lucide="alert-circle" class="w-3.5 h-3.5"></i><span>CPF Inválido. Verifique os números.</span>';
+            statusBox.classList.remove('hidden');
+            helpText.classList.add('hidden');
+          }
+          lucide.createIcons();
+        } else {
+          statusBox.classList.add('hidden');
+          helpText.classList.remove('hidden');
+        }
+      } else {
+        // CNPJ mask (up to 14 digits)
+        if (v.length > 14) v = v.slice(0, 14);
+        if (v.length > 12) v = v.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{1,2})/, '$1.$2.$3/$4-$5');
+        else if (v.length > 8) v = v.replace(/(\d{2})(\d{3})(\d{3})(\d{1,4})/, '$1.$2.$3/$4');
+        else if (v.length > 5) v = v.replace(/(\d{2})(\d{3})(\d{1,3})/, '$1.$2.$3');
+        else if (v.length > 2) v = v.replace(/(\d{2})(\d{1,3})/, '$1.$2');
+        input.value = v;
+
+        const clean = v.replace(/\D/g, '');
+        if (clean.length === 14) {
+          if (!validateCNPJ(clean)) {
+            statusBox.className = 'mt-1.5 text-xs font-bold text-rose-600 flex items-center gap-1.5';
+            statusBox.innerHTML = '<i data-lucide="alert-circle" class="w-3.5 h-3.5"></i><span>CNPJ Inválido. Verifique os números.</span>';
+            statusBox.classList.remove('hidden');
+            helpText.classList.add('hidden');
+            lucide.createIcons();
+            return;
+          }
+
+          // Consultar BrasilAPI online
+          statusBox.className = 'mt-1.5 text-xs font-bold text-indigo-600 flex items-center gap-1.5';
+          statusBox.innerHTML = '<span class="animate-spin text-sm">⏳</span><span>Consultando regularidade na Receita Federal...</span>';
+          statusBox.classList.remove('hidden');
+          helpText.classList.add('hidden');
+
+          docDebounceTimer = setTimeout(async () => {
+            try {
+              const res = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${clean}`);
+              if (!res.ok) throw new Error('Não localizado');
+              const data = await res.json();
+
+              const situacao = (data.descricao_situacao_cadastral || '').toUpperCase();
+              const razao = data.razao_social || data.nome_fantasia || '';
+
+              if (situacao === 'ATIVA') {
+                isDocValid = true;
+                validatedDocData = data;
+                statusBox.className = 'mt-1.5 text-xs font-bold text-emerald-600 flex items-center gap-1.5';
+                statusBox.innerHTML = `<i data-lucide="check-circle" class="w-3.5 h-3.5"></i><span>CNPJ Regular & ATIVO (${razao.slice(0, 28)}...)</span>`;
+                
+                // Auto preencher nome da loja se estiver vazio
+                const nameInput = document.getElementById('storeName');
+                if (!nameInput.value.trim() && (data.nome_fantasia || data.razao_social)) {
+                  nameInput.value = data.nome_fantasia || data.razao_social;
+                  autoGenerateSlug(nameInput.value);
+                }
+              } else {
+                isDocValid = false;
+                statusBox.className = 'mt-1.5 text-xs font-bold text-rose-600 flex items-center gap-1.5';
+                statusBox.innerHTML = `<i data-lucide="x-circle" class="w-3.5 h-3.5"></i><span>CNPJ Não Regularizado (Situação: ${situacao})</span>`;
+              }
+            } catch(e) {
+              // Fallback para validação algorítmica se a API pública oscilar
+              isDocValid = true;
+              statusBox.className = 'mt-1.5 text-xs font-bold text-emerald-600 flex items-center gap-1.5';
+              statusBox.innerHTML = '<i data-lucide="check-circle" class="w-3.5 h-3.5"></i><span>CNPJ Válido</span>';
+            } finally {
+              lucide.createIcons();
+            }
+          }, 600);
+        } else {
+          statusBox.classList.add('hidden');
+          helpText.classList.remove('hidden');
+        }
+      }
+    }
+
+    function validateCPF(cpf) {
+      if (!cpf || cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
+      let soma = 0, resto;
+      for (let i = 1; i <= 9; i++) soma += parseInt(cpf.substring(i - 1, i)) * (11 - i);
+      resto = (soma * 10) % 11;
+      if (resto === 10 || resto === 11) resto = 0;
+      if (resto !== parseInt(cpf.substring(9, 10))) return false;
+      soma = 0;
+      for (let i = 1; i <= 10; i++) soma += parseInt(cpf.substring(i - 1, i)) * (12 - i);
+      resto = (soma * 10) % 11;
+      if (resto === 10 || resto === 11) resto = 0;
+      if (resto !== parseInt(cpf.substring(10, 11))) return false;
+      return true;
+    }
+
+    function validateCNPJ(cnpj) {
+      if (!cnpj || cnpj.length !== 14 || /^(\d)\1+$/.test(cnpj)) return false;
+      let tamanho = cnpj.length - 2;
+      let numeros = cnpj.substring(0, tamanho);
+      let digitos = cnpj.substring(tamanho);
+      let soma = 0, pos = tamanho - 7;
+      for (let i = tamanho; i >= 1; i--) {
+        soma += numeros.charAt(tamanho - i) * pos--;
+        if (pos < 2) pos = 9;
+      }
+      let resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
+      if (resultado !== parseInt(digitos.charAt(0))) return false;
+      tamanho = tamanho + 1;
+      numeros = cnpj.substring(0, tamanho);
+      soma = 0;
+      pos = tamanho - 7;
+      for (let i = tamanho; i >= 1; i--) {
+        soma += numeros.charAt(tamanho - i) * pos--;
+        if (pos < 2) pos = 9;
+      }
+      resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
+      if (resultado !== parseInt(digitos.charAt(1))) return false;
+      return true;
+    }
+
     function maskPhone(input) {
       let v = input.value.replace(/\D/g, '');
       if (v.length > 11) v = v.slice(0, 11);
@@ -453,10 +602,25 @@
       const rawPhone = document.getElementById('storeWhatsapp').value.replace(/\D/g, '');
       const whatsapp = rawPhone.startsWith('55') ? rawPhone : ('55' + rawPhone);
       const pixKey = document.getElementById('storePix').value.trim();
-      const fee = parseFloat(document.getElementById('storeFee').value) || 5.00;
-      const ownerName = document.getElementById('ownerName').value.trim() || name;
+      const ownerDoc = document.getElementById('ownerDoc').value.trim();
       const ownerEmail = document.getElementById('ownerEmail').value.trim();
       const password = document.getElementById('storePassword').value.trim() || '123456';
+
+      if (!ownerEmail) {
+        alert('Por favor, informe seu e-mail de acesso.');
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="sparkles" class="w-4 h-4"></i><span>🚀 Ativar Minha Loja Agora</span>';
+        lucide.createIcons();
+        return;
+      }
+
+      if (ownerDoc && !isDocValid) {
+        alert('Por favor, informe um CPF ou CNPJ regular e válido.');
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="sparkles" class="w-4 h-4"></i><span>🚀 Ativar Minha Loja Agora</span>';
+        lucide.createIcons();
+        return;
+      }
 
       try {
         if (supabaseClient) {
