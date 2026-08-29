@@ -8,6 +8,11 @@
   pretty_urls = true
 
 [[redirects]]
+  from = "/admin-saas"
+  to = "/admin-saas.html"
+  status = 200
+
+[[redirects]]
   from = "/criar-loja"
   to = "/criar-loja.html"
   status = 200

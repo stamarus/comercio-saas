@@ -822,6 +822,18 @@
       updateModalPrice();
     }
 
+
+    function handleSegundoSaborChange() {
+      const select = document.getElementById('selectSegundoSabor');
+      const val = select.value;
+      if (val) {
+        selectedSegundoSabor = (storeMenu || []).find(p => p.id === val);
+      } else {
+        selectedSegundoSabor = null;
+      }
+      updateModalPrice();
+    }
+
     function updateModalPrice() {
       let unitPrice = parseFloat(currentModalItem?.preco) || 0;
       if (currentModalSelectedSize) {

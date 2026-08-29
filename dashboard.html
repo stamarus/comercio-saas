@@ -10,6 +10,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <!-- Supabase JS CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1189,7 +1190,151 @@
     }
 
     // TABS MANAGEMENT
+
+    // SWITCH TAB LOGIC
     function switchTab(tab) {
+      const tabs = ['hoje', 'historico', 'relatorios', 'cardapio', 'config'];
+      tabs.forEach(t => {
+        const view = document.getElementById('view' + t.charAt(0).toUpperCase() + t.slice(1));
+        const btn = document.getElementById('tabBtn_' + t);
+        if (t === tab) {
+          if (view) view.classList.remove('hidden');
+          if (btn) {
+            btn.className = 'flex-1 py-3 px-3 rounded-xl text-xs font-bold text-slate-700 bg-white shadow-sm flex items-center justify-center space-x-1.5 transition';
+          }
+        } else {
+          if (view) view.classList.add('hidden');
+          if (btn) {
+            btn.className = 'flex-1 py-3 px-3 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-700 flex items-center justify-center space-x-1.5 transition';
+          }
+        }
+      });
+
+      if (tab === 'relatorios') {
+        renderReports();
+      }
+      lucide.createIcons();
+    }
+
+    // REPORTS GENERATION
+    function renderReports() {
+      const all = allOrdersList || [];
+      const todayStr = new Date().toISOString().slice(0, 10);
+
+      const todayOrders = all.filter(o => (o.created_at || '').slice(0, 10) === todayStr && o.status !== 'cancelado');
+      const validOrders = all.filter(o => o.status !== 'cancelado');
+
+      const faturamentoHoje = todayOrders.reduce((acc, o) => acc + (parseFloat(o.total) || 0), 0);
+      const faturamentoTotal = validOrders.reduce((acc, o) => acc + (parseFloat(o.total) || 0), 0);
+      const ticketMedio = validOrders.length > 0 ? (faturamentoTotal / validOrders.length) : 0;
+
+      document.getElementById('repFaturamentoHoje').innerText = `R$ ${faturamentoHoje.toFixed(2).replace('.', ',')}`;
+      document.getElementById('repPedidosHojeCount').innerText = `${todayOrders.length} pedido(s) hoje`;
+
+      document.getElementById('repFaturamentoTotal').innerText = `R$ ${faturamentoTotal.toFixed(2).replace('.', ',')}`;
+      document.getElementById('repPedidosTotalCount').innerText = `${validOrders.length} pedido(s) válidos no total`;
+
+      document.getElementById('repTicketMedio').innerText = `R$ ${ticketMedio.toFixed(2).replace('.', ',')}`;
+
+      // Payment breakdown
+      const payMap = {};
+      validOrders.forEach(o => {
+        const method = o.forma_pagamento || 'Pix';
+        payMap[method] = (payMap[method] || 0) + 1;
+      });
+
+      let topMethod = 'Pix';
+      let topMethodCount = 0;
+      for (const [m, c] of Object.entries(payMap)) {
+        if (c > topMethodCount) {
+          topMethod = m;
+          topMethodCount = c;
+        }
+      }
+      document.getElementById('repFormaTop').innerText = topMethod;
+      document.getElementById('repFormaTopCount').innerText = `${topMethodCount} pedido(s)`;
+
+      const breakdownEl = document.getElementById('paymentBreakdownList');
+      if (Object.keys(payMap).length === 0) {
+        breakdownEl.innerHTML = '<p class="text-xs text-slate-400">Nenhuma venda registrada ainda.</p>';
+      } else {
+        breakdownEl.innerHTML = Object.entries(payMap).map(([m, c]) => {
+          const pct = Math.round((c / validOrders.length) * 100);
+          return `
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs font-bold text-slate-700">
+                <span>${m}</span>
+                <span>${c} pedidos (${pct}%)</span>
+              </div>
+              <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                <div class="bg-indigo-600 h-full rounded-full" style="width: ${pct}%"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Top Products breakdown
+      const prodMap = {};
+      validOrders.forEach(o => {
+        const itens = Array.isArray(o.itens) ? o.itens : [];
+        itens.forEach(item => {
+          const name = item.name || item.nome || 'Item';
+          const qty = item.qty || item.quantidade || 1;
+          prodMap[name] = (prodMap[name] || 0) + qty;
+        });
+      });
+
+      const topProductsEl = document.getElementById('topProductsList');
+      const sortedProds = Object.entries(prodMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
+      if (sortedProds.length === 0) {
+        topProductsEl.innerHTML = '<p class="text-xs text-slate-400">Nenhum produto vendido ainda.</p>';
+      } else {
+        topProductsEl.innerHTML = sortedProds.map(([name, qty], idx) => `
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs">
+            <div class="flex items-center space-x-2">
+              <span class="w-5 h-5 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center text-[10px]">${idx + 1}</span>
+              <span class="font-bold text-slate-800">${name}</span>
+            </div>
+            <span class="font-black text-indigo-600">${qty} un</span>
+          </div>
+        `).join('');
+      }
+    }
+
+    // QR CODE MODAL LOGIC
+    function openQrCodeModal() {
+      const baseUrl = window.location.origin;
+      const catalogUrl = `${baseUrl}/?loja=${currentLojaId}`;
+
+      document.getElementById('qrStoreTitle').innerText = currentStoreName;
+      document.getElementById('qrStoreUrlText').innerText = catalogUrl;
+
+      if (window.QRCode) {
+        const canvas = document.getElementById('qrCanvas');
+        QRCode.toCanvas(canvas, catalogUrl, {
+          width: 180,
+          margin: 1,
+          color: {
+            dark: '#1e1b4b',
+            light: '#ffffff'
+          }
+        });
+      }
+
+      document.getElementById('qrCodeModal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeQrCodeModal() {
+      document.getElementById('qrCodeModal').classList.add('hidden');
+    }
+
+    function printQrCodeDisplay() {
+      window.print();
+    }
+
+    function _old_switchTab(tab) {
       const tabs = ['hoje', 'historico', 'cardapio', 'config'];
       tabs.forEach(t => {
         const view = document.getElementById('view' + t.charAt(0).toUpperCase() + t.slice(1));

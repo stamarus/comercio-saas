@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Super Admin SaaS - Stamarus Solutions</title>
+  <meta name="theme-color" content="#312E81">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    netlify-drawer, #netlify-drawer-root, [id*="netlify-drawer"], [class*="netlify-drawer"], [data-netlify-badge], .netlify-badge, #netlify-badge, iframe[src*="netlify"], iframe[title*="Netlify"], div[data-netlify-deploy-id] {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+
+  <!-- TOP HEADER -->
+  <header class="bg-slate-800/80 backdrop-blur-md border-b border-slate-700 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-black text-xl shadow-lg shadow-indigo-600/30">
+          ⚡
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <h1 class="font-extrabold text-base text-white tracking-tight">Comércio<span class="text-indigo-400">SaaS</span></h1>
+            <span class="bg-indigo-500/20 text-indigo-300 text-[10px] font-black px-2 py-0.5 rounded-full border border-indigo-500/30">SUPER ADMIN</span>
+          </div>
+          <p class="text-[11px] text-slate-400">Gestão Global da Plataforma • Stamarus</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <a href="criar-loja.html" target="_blank" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs transition shadow-md flex items-center gap-1.5 active:scale-95">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          <span>Nova Loja</span>
+        </a>
+        <a href="index.html" class="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-700 transition" title="Ver Landing Page">
+          <i data-lucide="globe" class="w-5 h-5"></i>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6 flex-1 w-full">
+    
+    <!-- STATS CARDS -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-slate-800 rounded-3xl p-5 border border-slate-700/60 shadow-lg space-y-2">
+        <div class="flex items-center justify-between text-slate-400">
+          <span class="text-xs font-bold uppercase tracking-wider">Total de Lojas</span>
+          <div class="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+            <i data-lucide="store" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <p class="text-3xl font-black text-white" id="statTotalStores">0</p>
+        <p class="text-[11px] text-emerald-400 font-medium">Lojas criadas na plataforma</p>
+      </div>
+
+      <div class="bg-slate-800 rounded-3xl p-5 border border-slate-700/60 shadow-lg space-y-2">
+        <div class="flex items-center justify-between text-slate-400">
+          <span class="text-xs font-bold uppercase tracking-wider">Lojas Ativas</span>
+          <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+            <i data-lucide="check-circle" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <p class="text-3xl font-black text-emerald-400" id="statActiveStores">0</p>
+        <p class="text-[11px] text-slate-400 font-medium">Recebendo pedidos online</p>
+      </div>
+
+      <div class="bg-slate-800 rounded-3xl p-5 border border-slate-700/60 shadow-lg space-y-2">
+        <div class="flex items-center justify-between text-slate-400">
+          <span class="text-xs font-bold uppercase tracking-wider">Total de Pedidos</span>
+          <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+            <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <p class="text-3xl font-black text-amber-400" id="statTotalOrders">0</p>
+        <p class="text-[11px] text-slate-400 font-medium">Histórico acumulado</p>
+      </div>
+
+      <div class="bg-slate-800 rounded-3xl p-5 border border-slate-700/60 shadow-lg space-y-2">
+        <div class="flex items-center justify-between text-slate-400">
+          <span class="text-xs font-bold uppercase tracking-wider">Volume Transacionado</span>
+          <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+            <i data-lucide="dollar-sign" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <p class="text-3xl font-black text-emerald-400" id="statTotalVolume">R$ 0,00</p>
+        <p class="text-[11px] text-slate-400 font-medium">Estimado via catálogo</p>
+      </div>
+    </div>
+
+    <!-- FILTER & SEARCH BAR -->
+    <div class="bg-slate-800 rounded-3xl p-4 border border-slate-700/60 shadow-lg flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+      <div class="relative flex-1">
+        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+        <input type="text" id="searchStoreInput" oninput="renderStoresTable()" placeholder="Buscar loja por nome, slug ou nicho..." class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <select id="filterNicheSelect" onchange="renderStoresTable()" class="bg-slate-900 border border-slate-700 text-xs text-white p-2.5 rounded-xl font-bold focus:outline-none">
+          <option value="all">Todos os Nichos</option>
+          <option value="marmitaria">Marmitaria</option>
+          <option value="pizzaria">Pizzaria</option>
+          <option value="hamburgueria">Hamburgueria</option>
+          <option value="acai">Açaí</option>
+          <option value="bebidas">Distribuidora</option>
+          <option value="geral">Geral</option>
+        </select>
+        <button onclick="loadAllStores()" class="p-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white transition" title="Recarregar">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- STORES TABLE -->
+    <div class="bg-slate-800 rounded-3xl border border-slate-700/60 shadow-lg overflow-hidden">
+      <div class="p-4 border-b border-slate-700 flex items-center justify-between">
+        <h2 class="font-bold text-sm text-white flex items-center gap-2">
+          <i data-lucide="layers" class="w-4 h-4 text-indigo-400"></i>
+          <span>Lojas Cadastradas</span>
+        </h2>
+        <span id="storesCountBadge" class="text-xs text-slate-400 font-bold bg-slate-700 px-2.5 py-1 rounded-full">0 lojas</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-900/60 text-slate-400 font-bold uppercase tracking-wider border-b border-slate-700">
+            <tr>
+              <th class="p-4">Loja & Slug</th>
+              <th class="p-4">Nicho</th>
+              <th class="p-4">Senha Admin</th>
+              <th class="p-4">Status</th>
+              <th class="p-4">Criado em</th>
+              <th class="p-4 text-right">Ações Rápidas</th>
+            </tr>
+          </thead>
+          <tbody id="storesTableBody" class="divide-y divide-slate-700/60">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="max-w-7xl mx-auto px-4 sm:px-6 py-6 text-center text-xs text-slate-500 border-t border-slate-800 mt-auto w-full">
+    <p>Comércio SaaS • Desenvolvido por <strong class="text-indigo-400">Stamarus Solutions</strong> (Rafael Tamaributi)</p>
+  </footer>
+
+  <script>
+    const SUPABASE_URL = 'https://drecypzvptgyfltjlebh.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRyZWN5cHp2cHRneWZsdGpsZWJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5MzIwMTAsImV4cCI6MjEwMzUwODAxMH0.eVsHivVn8vvRmHU6e8qL74kFchrGB0NOohkoje6Hytc';
+    let supabaseClient = null;
+
+    try {
+      if (window.supabase) {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      }
+    } catch(e) {
+      console.warn('Supabase not initialized:', e);
+    }
+
+    let allStores = [];
+    let allOrders = [];
+
+    async function loadAllStores() {
+      if (!supabaseClient) return;
+      try {
+        const { data: stores, error } = await supabaseClient
+          .from('lojas')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (!error && stores) {
+          allStores = stores;
+        }
+
+        // Fetch Orders for stats
+        const { data: orders } = await supabaseClient
+          .from('pedidos')
+          .select('*');
+
+        if (orders) {
+          allOrders = orders;
+        }
+
+        updateStats();
+        renderStoresTable();
+      } catch(err) {
+        console.error('Error loading stores:', err);
+      }
+    }
+
+    function updateStats() {
+      document.getElementById('statTotalStores').innerText = allStores.length;
+      document.getElementById('statActiveStores').innerText = allStores.filter(s => s.ativo !== false).length;
+      document.getElementById('statTotalOrders').innerText = allOrders.length;
+
+      const totalVol = allOrders.reduce((sum, o) => sum + (parseFloat(o.total) || 0), 0);
+      document.getElementById('statTotalVolume').innerText = `R$ ${totalVol.toFixed(2).replace('.', ',')}`;
+    }
+
+    function renderStoresTable() {
+      const q = (document.getElementById('searchStoreInput').value || '').toLowerCase().trim();
+      const nicheFilter = document.getElementById('filterNicheSelect').value;
+
+      const filtered = allStores.filter(s => {
+        const matchesQuery = (s.nome || '').toLowerCase().includes(q) || (s.id || '').toLowerCase().includes(q) || (s.nicho || '').toLowerCase().includes(q);
+        const matchesNiche = nicheFilter === 'all' || s.nicho === nicheFilter;
+        return matchesQuery && matchesNiche;
+      });
+
+      document.getElementById('storesCountBadge').innerText = `${filtered.length} de ${allStores.length} lojas`;
+
+      const tbody = document.getElementById('storesTableBody');
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="p-8 text-center text-slate-500 font-bold">
+              Nenhuma loja encontrada.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(s => {
+        const catalogUrl = `index.html?loja=${s.id}`;
+        const dashUrl = `dashboard.html?loja=${s.id}`;
+        const dateStr = s.created_at ? new Date(s.created_at).toLocaleDateString('pt-BR') : 'Recente';
+
+        return `
+          <tr class="hover:bg-slate-700/30 transition">
+            <td class="p-4">
+              <div class="font-bold text-white text-sm">${s.nome}</div>
+              <div class="text-[11px] text-indigo-400 font-mono">?loja=${s.id}</div>
+            </td>
+            <td class="p-4">
+              <span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase bg-slate-700 text-slate-300">
+                ${s.nicho || 'Geral'}
+              </span>
+            </td>
+            <td class="p-4">
+              <span class="font-mono text-xs text-amber-400 bg-slate-900 px-2 py-1 rounded border border-slate-700 select-all font-bold">
+                ${s.senha_admin || 'admin123'}
+              </span>
+            </td>
+            <td class="p-4">
+              <span class="inline-flex items-center gap-1.5 text-[11px] font-bold ${s.ativo !== false ? 'text-emerald-400' : 'text-rose-400'}">
+                <span class="w-2 h-2 rounded-full ${s.ativo !== false ? 'bg-emerald-500' : 'bg-rose-500'}"></span>
+                ${s.ativo !== false ? 'Ativa' : 'Pausada'}
+              </span>
+            </td>
+            <td class="p-4 text-slate-400 text-[11px]">
+              ${dateStr}
+            </td>
+            <td class="p-4 text-right space-x-2 whitespace-nowrap">
+              <a href="${catalogUrl}" target="_blank" class="bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 font-bold px-3 py-1.5 rounded-xl transition inline-flex items-center gap-1">
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                <span>Cardápio</span>
+              </a>
+              <a href="${dashUrl}" target="_blank" class="bg-slate-700 hover:bg-slate-600 text-white font-bold px-3 py-1.5 rounded-xl transition inline-flex items-center gap-1">
+                <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i>
+                <span>Painel</span>
+              </a>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    // INIT
+    loadAllStores();
+  </script>
+</body>
+</html>
