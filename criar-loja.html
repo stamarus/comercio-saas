@@ -20,6 +20,26 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
   <script>
+
+    // DEVELOPER INFO MODAL LOGIC (STAMARUS)
+    window.openDevModal = function() {
+      const modal = document.getElementById('devModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+        if (window.lucide) lucide.createIcons();
+      }
+    };
+
+    window.closeDevModal = function() {
+      const modal = document.getElementById('devModal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+      }
+    };
+
+
     tailwind.config = {
       theme: {
         extend: {
@@ -786,7 +806,7 @@
     }
 
   </script>
-  <!-- DEVELOPER INFO MODAL (STAMARUS) -->
+    <!-- DEVELOPER INFO MODAL (STAMARUS) -->
   <div id="devModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9999] hidden flex items-center justify-center p-4" style="display: none;" onclick="if(event.target===this)closeDevModal()">
     <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4 animate-slide-up text-center border border-slate-100 relative">
       <button type="button" onclick="closeDevModal()" class="absolute right-4 top-4 p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100">
