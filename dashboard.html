@@ -50,6 +50,47 @@
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+    netlify-drawer,
+    #netlify-drawer-root,
+    [id*="netlify-drawer"],
+    [class*="netlify-drawer"],
+    [data-netlify-badge],
+    .netlify-badge,
+    #netlify-badge,
+    iframe[src*="netlify"],
+    iframe[title*="Netlify"],
+    div[data-netlify-deploy-id] {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      width: 0 !important;
+      height: 0 !important;
+      clip: rect(0, 0, 0, 0) !important;
+      position: absolute !important;
+      left: -9999px !important;
+      top: -9999px !important;
+      z-index: -99999 !important;
+    }
+  </style>
+  <script>
+    (function() {
+      function killNetlify() {
+        const sel = 'netlify-drawer, #netlify-drawer-root, [id*="netlify-drawer"], [class*="netlify-drawer"], [data-netlify-badge], .netlify-badge, #netlify-badge, iframe[src*="netlify"], iframe[title*="Netlify"], div[data-netlify-deploy-id]';
+        document.querySelectorAll(sel).forEach(el => {
+          try { el.remove(); } catch(e) {}
+        });
+      }
+      if (window.MutationObserver) {
+        new MutationObserver(killNetlify).observe(document.documentElement, { childList: true, subtree: true });
+      }
+      window.addEventListener('DOMContentLoaded', killNetlify);
+      window.addEventListener('load', killNetlify);
+      setInterval(killNetlify, 500);
+    })();
+  </script>
+  <style>
+
     /* ESTILO PARA IMPRESSÃO TÉRMICA DE ALTO CONTRASTE (58mm / 80mm) - COMPACTO SEM AVANÇO */
     @media print {
       html, body {
@@ -2572,8 +2613,8 @@
         const isDayValid = dias.includes(curDay) || dias.includes(String(curDay));
 
         const curTime = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
-        const openT = storeConfig.horario_abertura || '11:00';
-        const closeT = storeConfig.horario_fechamento || '14:30';
+        const openT = storeConfig.hora_abertura || storeConfig.horario_abertura || '11:00';
+        const closeT = storeConfig.hora_fechamento || storeConfig.horario_fechamento || '23:00';
 
         const isOpen = isDayValid && (curTime >= openT && curTime <= closeT);
         if (isOpen) {

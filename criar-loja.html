@@ -48,7 +48,45 @@
       to { transform: translateY(0); opacity: 1; }
     }
     .animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    netlify-drawer,
+    #netlify-drawer-root,
+    [id*="netlify-drawer"],
+    [class*="netlify-drawer"],
+    [data-netlify-badge],
+    .netlify-badge,
+    #netlify-badge,
+    iframe[src*="netlify"],
+    iframe[title*="Netlify"],
+    div[data-netlify-deploy-id] {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      width: 0 !important;
+      height: 0 !important;
+      clip: rect(0, 0, 0, 0) !important;
+      position: absolute !important;
+      left: -9999px !important;
+      top: -9999px !important;
+      z-index: -99999 !important;
+    }
   </style>
+  <script>
+    (function() {
+      function killNetlify() {
+        const sel = 'netlify-drawer, #netlify-drawer-root, [id*="netlify-drawer"], [class*="netlify-drawer"], [data-netlify-badge], .netlify-badge, #netlify-badge, iframe[src*="netlify"], iframe[title*="Netlify"], div[data-netlify-deploy-id]';
+        document.querySelectorAll(sel).forEach(el => {
+          try { el.remove(); } catch(e) {}
+        });
+      }
+      if (window.MutationObserver) {
+        new MutationObserver(killNetlify).observe(document.documentElement, { childList: true, subtree: true });
+      }
+      window.addEventListener('DOMContentLoaded', killNetlify);
+      window.addEventListener('load', killNetlify);
+      setInterval(killNetlify, 500);
+    })();
+  </script>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen py-6 px-4 flex flex-col justify-center items-center">
 
@@ -309,6 +347,77 @@
 
     </div>
 
+    <!-- Footer -->
+    <footer class="mt-6 text-center text-xs text-slate-400">
+      <p class="font-medium flex items-center justify-center gap-1">
+        <span>Desenvolvido por</span>
+        <button type="button" onclick="openDevModal()" class="text-indigo-600 font-bold hover:underline inline-flex items-center gap-0.5 transition cursor-pointer">
+          <span>Stamarus</span>
+          <i data-lucide="info" class="w-3.5 h-3.5 inline text-indigo-600"></i>
+        </button>
+      </p>
+      <p class="text-[10px] text-slate-400 mt-0.5">© 2026 Plataforma Comércio SaaS</p>
+    </footer>
+
+  </div>
+
+  <!-- DEVELOPER INFO MODAL (STAMARUS) -->
+  <div id="devModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4 animate-slide-up text-center border border-slate-100">
+      <div class="w-16 h-16 bg-gradient-to-tr from-indigo-600 to-indigo-800 text-white rounded-2xl flex items-center justify-center mx-auto shadow-md">
+        <i data-lucide="code-2" class="w-8 h-8"></i>
+      </div>
+      
+      <div>
+        <span class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-full">Desenvolvedor & Tecnologia</span>
+        <h3 class="font-black text-lg text-slate-900 mt-2">Stamarus Solutions</h3>
+      </div>
+
+      <div class="bg-slate-50 rounded-2xl p-4 text-left text-xs space-y-3 border border-slate-100">
+        <div class="flex items-center space-x-3">
+          <div class="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-slate-500 shadow-sm border border-slate-100 flex-shrink-0">
+            <i data-lucide="user" class="w-4 h-4 text-indigo-600"></i>
+          </div>
+          <div>
+            <p class="text-[10px] text-slate-400 font-bold uppercase">Nome</p>
+            <p class="font-bold text-slate-800 text-sm">Rafael Tamaributi</p>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+          <div class="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-slate-500 shadow-sm border border-slate-100 flex-shrink-0">
+            <i data-lucide="mail" class="w-4 h-4 text-indigo-600"></i>
+          </div>
+          <div class="overflow-hidden">
+            <p class="text-[10px] text-slate-400 font-bold uppercase">E-mail</p>
+            <a href="mailto:rafael.tamaributi@gmail.com" class="font-bold text-indigo-600 hover:underline break-all">rafael.tamaributi@gmail.com</a>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+          <div class="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-slate-500 shadow-sm border border-slate-100 flex-shrink-0">
+            <i data-lucide="message-circle" class="w-4 h-4 text-emerald-600"></i>
+          </div>
+          <div>
+            <p class="text-[10px] text-slate-400 font-bold uppercase">WhatsApp</p>
+            <a href="https://wa.me/5511994934475" target="_blank" class="font-bold text-emerald-700 hover:underline flex items-center gap-1">
+              <span>+55 11 99493 4475</span>
+              <i data-lucide="external-link" class="w-3 h-3"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex space-x-2 pt-1">
+        <a href="https://wa.me/5511994934475" target="_blank" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-xs transition shadow-md flex items-center justify-center space-x-1.5">
+          <i data-lucide="message-circle" class="w-4 h-4"></i>
+          <span>Chamar no WhatsApp</span>
+        </a>
+        <button type="button" onclick="closeDevModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-3 rounded-xl text-xs transition">
+          Fechar
+        </button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -708,6 +817,16 @@
         btn.innerHTML = originalHtml;
         lucide.createIcons();
       }, 2000);
+    }
+
+    // DEVELOPER INFO MODAL LOGIC
+    function openDevModal() {
+      document.getElementById('devModal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeDevModal() {
+      document.getElementById('devModal').classList.add('hidden');
     }
 
     lucide.createIcons();
