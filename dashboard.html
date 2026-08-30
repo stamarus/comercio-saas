@@ -552,6 +552,40 @@
             <textarea id="cfgClosedMessage" rows="2" class="w-full p-3 rounded-xl border border-gray-200 text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none bg-gray-50" placeholder="Ex: Estamos fechados no momento. Nosso atendimento é de Seg a Sáb, das 11h às 14h30."></textarea>
           </div>
 
+          <!-- Pagamentos Online & Cartão (Configurável) -->
+          <div class="pt-6 border-t border-slate-200 space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="font-extrabold text-sm text-slate-900 flex items-center space-x-2">
+                  <i data-lucide="credit-card" class="w-4 h-4 text-indigo-600"></i>
+                  <span>Configuração de Cartão & Pagamentos Online</span>
+                </h3>
+                <p class="text-[11px] text-slate-500 mt-0.5">Escolha se deseja receber via Link de Pagamento ou Checkout Transparente.</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Modalidade de Cartão Online</label>
+                <select id="cfgCardOnlineMode" onchange="handleCardOnlineModeChange()" class="w-full p-2.5 rounded-xl border border-slate-200 text-xs font-bold focus:ring-2 focus:ring-indigo-500 bg-slate-50">
+                  <option value="link">🔗 Link de Pagamento (Mercado Pago / InfinitePay / PagSeguro)</option>
+                  <option value="transparente">💳 Checkout Transparente (Cartão Direto na Tela)</option>
+                  <option value="desativado">🚫 Desativar Cartão Online (Apenas Pix/Entrega)</option>
+                </select>
+              </div>
+
+              <div id="fieldCardOnlineLink">
+                <label class="block text-xs font-bold text-slate-700 mb-1">Link de Pagamento Fixo (Mercado Pago/InfinitePay)</label>
+                <input type="text" id="cfgCardOnlineLink" placeholder="Ex: https://link.mercadopago.com.br/sualoja" class="w-full p-2.5 rounded-xl border border-slate-200 text-xs font-mono focus:ring-2 focus:ring-indigo-500 bg-slate-50">
+              </div>
+
+              <div id="fieldCardOnlineKey" class="hidden">
+                <label class="block text-xs font-bold text-slate-700 mb-1">Public Key / Token (Mercado Pago / Asaas)</label>
+                <input type="text" id="cfgCardOnlineKey" placeholder="Ex: TEST-xxxx / APP_USR-xxxx" class="w-full p-2.5 rounded-xl border border-slate-200 text-xs font-mono focus:ring-2 focus:ring-indigo-500 bg-slate-50">
+              </div>
+            </div>
+          </div>
+
           <!-- Evolution API WhatsApp Automation Section -->
           <div class="pt-6 border-t border-gray-200 space-y-4">
             <div class="flex items-center justify-between">
@@ -2812,6 +2846,23 @@
       updateStoreStatusBadge();
     }
 
+    
+    function handleCardOnlineModeChange() {
+      const mode = document.getElementById('cfgCardOnlineMode').value;
+      const fieldLink = document.getElementById('fieldCardOnlineLink');
+      const fieldKey = document.getElementById('fieldCardOnlineKey');
+      if (mode === 'transparente') {
+        fieldLink.classList.add('hidden');
+        fieldKey.classList.remove('hidden');
+      } else if (mode === 'link') {
+        fieldLink.classList.remove('hidden');
+        fieldKey.classList.add('hidden');
+      } else {
+        fieldLink.classList.add('hidden');
+        fieldKey.classList.add('hidden');
+      }
+    }
+
     function populateConfigUI() {
       const mode = storeConfig.status_modo || 'auto';
       handleModeChange(mode);
@@ -2865,6 +2916,9 @@
       const pixKey = document.getElementById('cfgPixKey').value.trim() || '41985294063';
       const fee = parseFloat(document.getElementById('cfgDeliveryFee').value) || 5.00;
       const closedMsg = document.getElementById('cfgClosedMessage').value.trim();
+      const cardOnlineMode = document.getElementById('cfgCardOnlineMode').value;
+      const cardOnlineLink = document.getElementById('cfgCardOnlineLink').value.trim();
+      const cardOnlineKey = document.getElementById('cfgCardOnlineKey').value.trim();
 
       // Evolution API properties
       const evolutionUrl = document.getElementById('cfgEvolutionUrl').value.trim();
@@ -2889,6 +2943,9 @@
         pix_key: pixKey,
         delivery_fee: fee,
         mensagem_fechado: closedMsg,
+        card_online_mode: cardOnlineMode,
+        card_online_link: cardOnlineLink,
+        card_online_key: cardOnlineKey,
         evolution_api_url: evolutionUrl,
         evolution_api_key: evolutionKey,
         evolution_instance: evolutionInstance,
